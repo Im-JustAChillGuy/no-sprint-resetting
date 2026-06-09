@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nosprintresetting",
-  "version": "${version}",
+  "version": "1.0.0",
   "name": "No Sprint Resetting",
   "description": "Prevents sprint resets by automatically keeping the player sprinting.",
   "authors": [
