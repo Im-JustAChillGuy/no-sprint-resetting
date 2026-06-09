@@ -36,3 +36,28 @@ public class NoSprintResettingConfig {
                 disableWhileSneaking = data.disableWhileSneaking;
                 disableInWater = data.disableInWater;
                 disableWhileTakingDamage = data.disableWhileTakingDamage;
+                disableWhileEating = data.disableWhileEating;
+                minHungerThreshold = data.minHungerThreshold;
+            }
+        } catch (IOException e) {
+            System.err.println("[NoSprintResetting] Failed to load config: " + e.getMessage());
+        }
+    }
+
+    public static void save() {
+        try {
+            Files.writeString(CONFIG_PATH, GSON.toJson(new ConfigData()));
+        } catch (IOException e) {
+            System.err.println("[NoSprintResetting] Failed to save config: " + e.getMessage());
+        }
+    }
+
+    private static class ConfigData {
+        boolean enabled = NoSprintResettingConfig.enabled;
+        boolean disableWhileSneaking = NoSprintResettingConfig.disableWhileSneaking;
+        boolean disableInWater = NoSprintResettingConfig.disableInWater;
+        boolean disableWhileTakingDamage = NoSprintResettingConfig.disableWhileTakingDamage;
+        boolean disableWhileEating = NoSprintResettingConfig.disableWhileEating;
+        int minHungerThreshold = NoSprintResettingConfig.minHungerThreshold;
+    }
+}
