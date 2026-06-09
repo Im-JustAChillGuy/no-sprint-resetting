@@ -2,11 +2,9 @@ package com.example;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.EndTick;
 
 public class NoSprintResettingClient implements ClientModInitializer {
 
-    // Track last health to detect damage
     private float lastHealth = -1f;
     private boolean wasDamaged = false;
     private int damageCooldown = 0;
@@ -19,7 +17,6 @@ public class NoSprintResettingClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
 
-            // Damage detection - compare health each tick
             float currentHealth = client.player.getHealth();
             if (lastHealth > 0 && currentHealth < lastHealth) {
                 wasDamaged = true;
@@ -33,13 +30,11 @@ public class NoSprintResettingClient implements ClientModInitializer {
             }
 
             if (!NoSprintResettingConfig.enabled) return;
-
-            // Check each condition
-            if (NoSprintResettingConfig.disableWhileSneaking && client.player.isShiftKeyDown()) return;
-            if (NoSprintResettingConfig.disableInWater && client.player.isInWater()) return;
+            if (NoSprintResettingConfig.disableWhileSneaking && client.player.isSneaking()) return;
+            if (NoSprintResettingConfig.disableInWater && client.player.isTouchingWater()) return;
             if (NoSprintResettingConfig.disableWhileTakingDamage && wasDamaged) return;
             if (NoSprintResettingConfig.disableWhileEating && client.player.isUsingItem()) return;
-            if (client.player.getFoodData().getFoodLevel() <= NoSprintResettingConfig.minHungerThreshold) return;
+            if (client.player.getHungerManager().getFoodLevel() <= NoSprintResettingConfig.minHungerThreshold) return;
 
             client.player.setSprinting(true);
         });
