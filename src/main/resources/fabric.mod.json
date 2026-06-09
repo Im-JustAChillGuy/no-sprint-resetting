@@ -12,10 +12,10 @@
     "client": [
       "com.example.NoSprintResettingClient"
     ],
-  "modmenu": [
-    "com.example.NoSprintResettingModMenu"
-  ]
-}
+    "modmenu": [
+      "com.example.NoSprintResettingModMenu"
+    ]
+  },
   "depends": {
     "fabricloader": ">=0.16.0",
     "minecraft": ">=26.1",
