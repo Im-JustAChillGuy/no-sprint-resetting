@@ -1,45 +1,40 @@
 package com.example;
 
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
 
 public class ConfigScreen extends Screen {
 
-    public ConfigScreen() {
-        super(Text.literal("No Sprint Resetting"));
+    private final Screen parent;
+
+    public ConfigScreen(Screen parent) {
+        super(Component.literal("No Sprint Resetting Config"));
+        this.parent = parent;
     }
 
     @Override
     protected void init() {
-
-        addDrawableChild(
-                ButtonWidget.builder(
-                        Text.literal("Enabled: " +
-                                (NoSprintResettingConfig.enabled ? "ON" : "OFF")),
-                        button -> {
-                            NoSprintResettingConfig.enabled =
-                                    !NoSprintResettingConfig.enabled;
-
-                            button.setMessage(
-                                    Text.literal("Enabled: " +
-                                            (NoSprintResettingConfig.enabled ? "ON" : "OFF"))
-                            );
-                        }
-                ).dimensions(width / 2 - 100, 50, 200, 20).build()
+        this.addRenderableWidget(
+            Button.builder(
+                Component.literal("Enabled: " + NoSprintResettingConfig.isEnabled()),
+                btn -> {
+                    NoSprintResettingConfig.setEnabled(!NoSprintResettingConfig.isEnabled());
+                    btn.setMessage(Component.literal("Enabled: " + NoSprintResettingConfig.isEnabled()));
+                }
+            ).bounds(this.width / 2 - 100, 50, 200, 20).build()
         );
 
-        addDrawableChild(
-                ButtonWidget.builder(
-                        Text.literal("Done"),
-                        button -> close()
-                ).dimensions(width / 2 - 100, height - 40, 200, 20).build()
+        this.addRenderableWidget(
+            Button.builder(
+                Component.literal("Done"),
+                btn -> this.onClose()
+            ).bounds(this.width / 2 - 100, this.height - 40, 200, 20).build()
         );
     }
 
     @Override
-    public void close() {
-        assert client != null;
-        client.setScreen(null);
+    public void onClose() {
+        this.minecraft.setScreen(parent);
     }
 }
