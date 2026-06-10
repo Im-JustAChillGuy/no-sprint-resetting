@@ -1,13 +1,16 @@
 pluginManagement {
-	repositories {
-		maven {
-			name = 'Fabric'
-			url = 'https://maven.fabricmc.net/'
-		}
-		mavenCentral()
-		gradlePluginPortal()
-	}
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        gradlePluginPortal()
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'net.fabricmc.fabric-loom') {
+                useVersion(settings.ext.get('loom_version'))
+            }
+        }
+    }
 }
-
-// Should match your modid
-rootProject.name = 'modid'
