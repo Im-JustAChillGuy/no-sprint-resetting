@@ -1,4 +1,4 @@
-package com.example..network;
+package com.example.network;
  
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
