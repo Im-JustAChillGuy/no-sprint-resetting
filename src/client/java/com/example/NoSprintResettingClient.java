@@ -16,7 +16,7 @@ public class NoSprintResettingClient implements ClientModInitializer {
     // ── Packet: client → server ("do you allow this mod?") ──────────────────
     public record OptInRequestPayload() implements CustomPacketPayload {
         public static final Type<OptInRequestPayload> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath("nosprintresetting", "opt_in_request"));
+                new Type<>(Identifier.of("nosprintresetting", "opt_in_request"));
         public static final StreamCodec<FriendlyByteBuf, OptInRequestPayload> CODEC =
                 StreamCodec.unit(new OptInRequestPayload());
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
@@ -25,7 +25,7 @@ public class NoSprintResettingClient implements ClientModInitializer {
     // ── Packet: server → client ("yes, you're allowed") ─────────────────────
     public record OptInGrantedPayload() implements CustomPacketPayload {
         public static final Type<OptInGrantedPayload> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath("nosprintresetting", "opt_in_granted"));
+                new Type<>(Identifier.of("nosprintresetting", "opt_in_granted"));
         public static final StreamCodec<FriendlyByteBuf, OptInGrantedPayload> CODEC =
                 StreamCodec.unit(new OptInGrantedPayload());
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
