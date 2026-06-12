@@ -1,40 +1,14 @@
 package com.example;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 public class NoSprintResettingClient implements ClientModInitializer {
 
-    // ── Packet: client → server ("do you allow this mod?") ──────────────────
-    public record OptInRequestPayload() implements CustomPacketPayload {
-        public static final Type<OptInRequestPayload> TYPE =
-                new Type<>(Identifier.of("nosprintresetting", "opt_in_request"));
-        public static final StreamCodec<FriendlyByteBuf, OptInRequestPayload> CODEC =
-                StreamCodec.unit(new OptInRequestPayload());
-        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
-    }
+    public static boolean serverOptIn = true; // Default true for singleplayer
 
-    // ── Packet: server → client ("yes, you're allowed") ─────────────────────
-    public record OptInGrantedPayload() implements CustomPacketPayload {
-        public static final Type<OptInGrantedPayload> TYPE =
-                new Type<>(Identifier.of("nosprintresetting", "opt_in_granted"));
-        public static final StreamCodec<FriendlyByteBuf, OptInGrantedPayload> CODEC =
-                StreamCodec.unit(new OptInGrantedPayload());
-        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
-    }
-
-    // Whether the current server has opted in. Off by default.
-    private static volatile boolean serverOptedIn = false;
-
-    // ── Damage tracking (unchanged from original) ────────────────────────────
     private float lastHealth = -1f;
     private boolean wasDamaged = false;
     private int damageCooldown = 0;
@@ -44,47 +18,33 @@ public class NoSprintResettingClient implements ClientModInitializer {
     public void onInitializeClient() {
         NoSprintResettingConfig.load();
 
-        // Register packet types
-        PayloadTypeRegistry.serverboundPlay().register(OptInRequestPayload.TYPE, OptInRequestPayload.CODEC);
-        PayloadTypeRegistry.clientboundPlay().register(OptInGrantedPayload.TYPE, OptInGrantedPayload.CODEC);
-
-        // When the server grants opt-in, enable the mod for this session
-        ClientPlayNetworking.registerGlobalReceiver(OptInGrantedPayload.TYPE, (payload, context) -> {
-            serverOptedIn = true;
+        // Listen for server opt-in packet
+        ClientPlayNetworking.registerGlobalReceiver(ServerOptInPayload.ID, (payload, context) -> {
+            serverOptIn = payload.optIn();
         });
 
-        // On every server join: reset state, then ask the server if it opts in
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            serverOptedIn = false;
-            sender.sendPacket(new OptInRequestPayload());
-        });
-
-        // Clean up on disconnect
+        // Reset to true when disconnecting (for singleplayer default)
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-            serverOptedIn = false;
+            serverOptIn = true;
         });
 
-        // Tick logic — unchanged, just guarded by serverOptedIn
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
 
-            // Damage detection
             float currentHealth = client.player.getHealth();
             if (lastHealth > 0 && currentHealth < lastHealth) {
                 wasDamaged = true;
                 damageCooldown = DAMAGE_COOLDOWN_TICKS;
             }
             lastHealth = currentHealth;
+
             if (damageCooldown > 0) {
                 damageCooldown--;
                 if (damageCooldown == 0) wasDamaged = false;
             }
 
-            // ── Opt-in gate ──────────────────────────────────────────────────
-            if (!serverOptedIn) return;
-
             if (!NoSprintResettingConfig.enabled) return;
-
+            if (!serverOptIn) return; // Respect server opt-in
             if (NoSprintResettingConfig.disableWhileSneaking && client.player.isShiftKeyDown()) return;
             if (NoSprintResettingConfig.disableInWater && client.player.isInWater()) return;
             if (NoSprintResettingConfig.disableWhileTakingDamage && wasDamaged) return;
