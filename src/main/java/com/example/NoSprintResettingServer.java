@@ -11,7 +11,6 @@ public class NoSprintResettingServer implements ModInitializer {
         NoSprintResettingServerConfig.load();
         PayloadTypeRegistry.playS2C().register(ServerOptInPayload.ID, ServerOptInPayload.CODEC);
 
-        // When a player joins, tell their client whether this server has opted in
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayNetworking.send(handler.player,
                 new ServerOptInPayload(NoSprintResettingServerConfig.serverOptIn));
