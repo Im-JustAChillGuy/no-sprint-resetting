@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 public class NoSprintResettingClient implements ClientModInitializer {
 
-    public static boolean serverOptIn = true; // Default true for singleplayer
+    public static boolean serverOptIn = true;
 
     private float lastHealth = -1f;
     private boolean wasDamaged = false;
@@ -18,12 +18,10 @@ public class NoSprintResettingClient implements ClientModInitializer {
     public void onInitializeClient() {
         NoSprintResettingConfig.load();
 
-        // Listen for server opt-in packet
         ClientPlayNetworking.registerGlobalReceiver(ServerOptInPayload.ID, (payload, context) -> {
             serverOptIn = payload.optIn();
         });
 
-        // Reset to true when disconnecting (for singleplayer default)
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             serverOptIn = true;
         });
@@ -44,7 +42,7 @@ public class NoSprintResettingClient implements ClientModInitializer {
             }
 
             if (!NoSprintResettingConfig.enabled) return;
-            if (!serverOptIn) return; // Respect server opt-in
+            if (!serverOptIn) return;
             if (NoSprintResettingConfig.disableWhileSneaking && client.player.isShiftKeyDown()) return;
             if (NoSprintResettingConfig.disableInWater && client.player.isInWater()) return;
             if (NoSprintResettingConfig.disableWhileTakingDamage && wasDamaged) return;
