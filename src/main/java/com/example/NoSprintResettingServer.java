@@ -9,7 +9,7 @@ public class NoSprintResettingServer implements ModInitializer {
     @Override
     public void onInitialize() {
         NoSprintResettingServerConfig.load();
-        PayloadTypeRegistry.playS2C().register(ServerOptInPayload.ID, ServerOptInPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ServerOptInPayload.TYPE, ServerOptInPayload.CODEC);
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayNetworking.send(handler.player,
