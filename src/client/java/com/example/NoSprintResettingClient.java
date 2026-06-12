@@ -18,7 +18,7 @@ public class NoSprintResettingClient implements ClientModInitializer {
     public void onInitializeClient() {
         NoSprintResettingConfig.load();
 
-        ClientPlayNetworking.registerGlobalReceiver(ServerOptInPayload.ID, (payload, context) -> {
+        ClientPlayNetworking.registerGlobalReceiver(ServerOptInPayload.TYPE, (payload, context) -> {
             serverOptIn = payload.optIn();
         });
 
